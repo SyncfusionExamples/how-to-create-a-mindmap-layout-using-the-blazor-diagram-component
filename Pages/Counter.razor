@@ -1,0 +1,147 @@
+﻿@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
+
+<SfDiagramComponent @ref="@diagram" Height="900px" Width="1200px" NodeCreating="@NodeCreate" ConnectorCreating="@ConnectorCreate">
+    <DataSourceSettings ID="Id" ParentID="ParentId" DataSource="@DataSource"></DataSourceSettings>
+    <Layout Type="LayoutType.MindMap" HorizontalSpacing="90" VerticalSpacing="50">
+        <LayoutMargin Left="10" Right="10" Top="10" Bottom="10"></LayoutMargin>
+    </Layout>
+</SfDiagramComponent>
+@*<SfDiagramComponent Height="900px" Width="1200px" NodeCreating="@NodeCreate" >
+    <DataSourceSettings ID="Id" ParentID="ParentId" DataSource="@DataSource"></DataSourceSettings>
+    <Layout Type="LayoutType.MindMap"></Layout>
+    </SfDiagramComponent>*@
+@code {
+    public class MindmapDetails
+    {
+        public string Id { get; set; }
+        public string Label { get; set; }
+        public string ParentId { get; set; }
+        public BranchType Branch { get; set; }
+        public string Fill { get; set; }
+    }
+    public object DataSource = new List<object>()
+    {
+            new MindmapDetails(){Id="1",Label="Business Planning",ParentId ="",Branch= BranchType.Root },
+            new MindmapDetails(){Id="2",Label= "Expectation",ParentId = "1",Branch= BranchType.Left },
+            new MindmapDetails(){Id="3",Label= "Requirements", ParentId="1",Branch= BranchType.Right },
+            new MindmapDetails(){Id="4",Label= "Marketing", ParentId="1",Branch= BranchType.Left },
+            new MindmapDetails(){Id="5",Label= "Budgets",ParentId= "1",Branch= BranchType.Right },
+            new MindmapDetails(){ Id="6", Label="Situation in Market", ParentId= "1", Branch = BranchType.Left },
+            new MindmapDetails(){ Id="7", Label="Product Sales", ParentId= "2", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "8", Label= "Strategy", ParentId="2", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "9", Label="Contacts", ParentId="2", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "10", Label="Customer Groups", ParentId= "4", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "11", Label= "Branding", ParentId= "4", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "12", Label= "Advertising", ParentId= "4", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "13", Label= "Competitors", ParentId= "6", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "14", Label="Location", ParentId="6", Branch = BranchType.SubLeft },
+            new MindmapDetails() { Id = "15", Label= "Director", ParentId= "3", Branch = BranchType.SubRight },
+            new MindmapDetails() { Id = "16", Label="Accounts Department", ParentId= "3", Branch = BranchType.SubRight },
+            new MindmapDetails() { Id = "17", Label="Administration", ParentId= "3", Branch = BranchType.SubRight },
+            new MindmapDetails() { Id = "18", Label= "Development", ParentId="3", Branch = BranchType.SubRight },
+            new MindmapDetails() { Id = "19", Label= "Estimation", ParentId= "5", Branch = BranchType.SubRight },
+            new MindmapDetails() { Id = "20", Label= "Profit", ParentId= "5", Branch = BranchType.SubRight },
+            new MindmapDetails(){ Id="21", Label="Funds", ParentId= "5", Branch = BranchType.SubRight }
+
+           
+    };
+    private void NodeCreate(IDiagramObject obj)
+    {
+        Node node = obj as Node;
+        MindmapDetails mindMapData = node.Data as MindmapDetails;
+        node.Annotations = new DiagramObjectCollection<ShapeAnnotation>()
+        {
+            new ShapeAnnotation()
+            {
+                Content = mindMapData.Label,
+                Style = { Color ="white"}
+
+            }
+        };
+
+        node.Height = 50;
+        node.Width = 150;
+        node.Style.Fill = mindMapData.Fill;
+        node.Style.StrokeColor = mindMapData.Fill;
+       // node.Style.StrokeWidth = 0;
+        node.Shape = new BasicShape() { Type = NodeShapes.Basic, Shape = NodeBasicShapes.Ellipse };
+
+        if (mindMapData.Branch == BranchType.Root)
+        {
+            node.Shape = new PathShape() { Type = NodeShapes.Path, Data = "M55.7315 17.239C57.8719 21.76 54.6613 27.788 47.1698 26.0787C46.0997 32.309 33.2572 35.323 28.9764 29.2951C25.7658 35.323 10.7829 33.816 10.7829 26.0787C3.29143 30.802 -0.989391 20.253 2.22121 17.239C-0.989317 14.2249 2.22121 6.68993 10.7829 8.39934C13.9935 -0.845086 25.7658 -0.845086 28.9764 5.18301C32.187 0.661909 45.0294 0.661908 47.1698 8.39934C52.5209 5.18301 60.0123 12.7179 55.7315 17.239Z" };
+        }
+
+
+        node.ExpandIcon = new DiagramExpandIcon()
+            {
+                Shape = DiagramExpandIcons.Minus,
+                Height = 15,
+                Width = 15,
+                CornerRadius = 10,
+                OffsetX = (mindMapData.Branch == BranchType.Root) ? 0.5 : (mindMapData.Branch == BranchType.Right || mindMapData.Branch == BranchType.SubRight) ? 0 : 1,
+                OffsetY = (mindMapData.Branch == BranchType.Root) ? 1 : (mindMapData.Branch == BranchType.Right || mindMapData.Branch == BranchType.SubRight) ? 0.5 : 0.5
+            };
+        node.CollapseIcon = new DiagramCollapseIcon()
+            {
+                Shape = DiagramCollapseIcons.Plus,
+                Height = 15,
+                Width = 15,
+                CornerRadius = 10,
+                OffsetX = (mindMapData.Branch == BranchType.Root) ? 0.5 : (mindMapData.Branch == BranchType.Right || mindMapData.Branch == BranchType.SubRight) ? 0 : 1,
+                OffsetY = (mindMapData.Branch == BranchType.Root) ? 1 : (mindMapData.Branch == BranchType.Right || mindMapData.Branch == BranchType.SubRight) ? 0.5 : 0.5
+            };
+
+
+    }
+    SfDiagramComponent diagram;
+    private void ConnectorCreate(IDiagramObject obj)
+    {
+        Connector connector = obj as Connector;
+        connector.Type = ConnectorSegmentType.Bezier;
+        connector.Constraints = ConnectorConstraints.Default & ~ConnectorConstraints.Select;
+        connector.TargetDecorator = new DecoratorSettings() { Shape = DecoratorShape.None };
+        connector.SourceDecorator.Shape = DecoratorShape.None;
+        Node sourceNode = diagram.GetObject(connector.SourceID) as Node;
+        MindmapDetails mindMapData = sourceNode.Data as MindmapDetails;
+        // MindMapItem data = sourceNode.Data as MindMapItem;
+        if (mindMapData.Branch == BranchType.Root)
+        {
+            connector.Style = new ShapeStyle() { StrokeColor = "#8E44AD", StrokeWidth = 3 };
+        }
+
+        else if (mindMapData.Branch == BranchType.Left || mindMapData.Branch == BranchType.Right)
+        {
+            connector.Style = new ShapeStyle() { StrokeColor = "#3498DB", StrokeWidth = 3 };
+        }
+        else
+            connector.Style = new ShapeStyle() { StrokeColor = "#3dbfc9", StrokeWidth = 3 };
+    }
+
+    // Connector connectors = connector as Connector;
+    // connectors.Type = ConnectorSegmentType.Bezier;
+    //// connectors.Style = new TextStyle() { Fill = "#6495ED" StrokeColor = "#6495ED", StrokeWidth = 2 };
+    // connectors.TargetDecorator = new DecoratorSettings
+    //     {
+    //         Shape = DecoratorShape.Square,
+    //         Style = new ShapeStyle() { Fill = "#6f409f", StrokeColor = "#6f409f", StrokeWidth = 2 }
+    //     };
+}
+}
+
