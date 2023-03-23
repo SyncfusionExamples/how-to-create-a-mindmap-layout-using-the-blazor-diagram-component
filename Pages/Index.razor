@@ -1,0 +1,111 @@
+﻿@page "/"
+<SfDiagramComponent @ref="@diagram"  Height="900px" Width="1200px" NodeCreating="@NodeCreate" 
+    ConnectorCreating="@ConnectorCreate">
+    <DataSourceSettings DataSource="@DiagramDataSource" ID="Id" ParentID="ParentId">
+    </DataSourceSettings>
+    <Layout Type="LayoutType.MindMap" HorizontalSpacing="90" VerticalSpacing="50">
+        <LayoutMargin Left="20" Right="20" Top="20" Bottom="20"></LayoutMargin>
+    </Layout>
+</SfDiagramComponent>
+
+@code{
+    SfDiagramComponent diagram;
+    public class MindmapDetails
+    {
+        public string Id { get; set; }
+        public string Label { get; set; }
+        public string ParentId { get; set; }
+        public BranchType Branch { get; set; }
+        public string Fill { get; set; }
+    }
+    public object DiagramDataSource = new List<object>()
+    {
+             new MindmapDetails(){Id="1",Label="Business Planning",ParentId ="",Branch= BranchType.Root, Fill="#e83845" },
+   new MindmapDetails(){Id="2",Label= "Expectation",ParentId = "1",Branch= BranchType.Left,Fill= "#ff983b" },
+   new MindmapDetails(){Id="3",Label= "Requirements", ParentId="1",Branch= BranchType.Right,Fill= "#ff983b" },
+   new MindmapDetails(){Id="4",Label= "Marketing", ParentId="1",Branch= BranchType.Left,Fill= "#ff983b" },
+   new MindmapDetails(){Id="5",Label= "Budgets",ParentId= "1",Branch= BranchType.Right,Fill= "#ff983b" },
+   new MindmapDetails(){ Id="6", Label="Situation in Market", ParentId= "1", Branch = BranchType.Left, Fill= "#ff983b" },
+   new MindmapDetails(){ Id="7", Label="Product Sales", ParentId= "2", Branch = BranchType.SubLeft, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "8", Label= "Strategy", ParentId="2", Branch = BranchType.SubLeft, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "9", Label="Contacts", ParentId="2", Branch = BranchType.SubLeft, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "10", Label="Customer Groups", ParentId= "4", Branch = BranchType.SubLeft,Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "11", Label= "Branding", ParentId= "4", Branch = BranchType.SubLeft, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "12", Label= "Advertising", ParentId= "4", Branch = BranchType.SubLeft, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "13", Label= "Competitors", ParentId= "6", Branch = BranchType.SubLeft, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "14", Label="Location", ParentId="6", Branch = BranchType.SubLeft, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "15", Label= "Director", ParentId= "3", Branch = BranchType.SubRight, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "16", Label="Accounts Department", ParentId= "3", Branch = BranchType.SubRight, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "17", Label="Administration", ParentId= "3", Branch = BranchType.SubRight, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "18", Label= "Development", ParentId="3", Branch = BranchType.SubRight, Fill= "#3dbfc9" },
+   new MindmapDetails() { Id = "19", Label= "Estimation", ParentId= "5", Branch = BranchType.SubRight, Fill="#3dbfc9" },
+   new MindmapDetails() { Id = "20", Label= "Profit", ParentId= "5", Branch = BranchType.SubRight, Fill= "#3dbfc9" },
+   new MindmapDetails(){ Id="21", Label="Funds", ParentId= "5", Branch = BranchType.SubRight, Fill= "#3dbfc9" }
+
+    };
+    private void NodeCreate(IDiagramObject obj)
+    {
+        Node diagram_node = obj as Node;
+        MindmapDetails MindmapData = diagram_node.Data as MindmapDetails;
+        diagram_node.Annotations = new DiagramObjectCollection<ShapeAnnotation>()
+        {
+            new ShapeAnnotation()
+            {
+                Content = MindmapData.Label,
+                Style = {Color="white"}
+            }
+        };
+        diagram_node.Height = 50;
+        diagram_node.Width = 150;
+        diagram_node.Shape = new BasicShape() { Type = NodeShapes.Basic, Shape = NodeBasicShapes.Ellipse };
+        diagram_node.Style = new ShapeStyle()
+            {
+                Fill = MindmapData.Fill,
+                StrokeColor = MindmapData.Fill,
+                StrokeWidth = 2
+            };
+        if(MindmapData.Branch == BranchType.Root)
+        {
+            diagram_node.Shape = new PathShape() { Type = NodeShapes.Path, Data = "M55.7315 17.239C57.8719 21.76 54.6613 27.788 47.1698 26.0787C46.0997 32.309 33.2572 35.323 28.9764 29.2951C25.7658 35.323 10.7829 33.816 10.7829 26.0787C3.29143 30.802 -0.989391 20.253 2.22121 17.239C-0.989317 14.2249 2.22121 6.68993 10.7829 8.39934C13.9935 -0.845086 25.7658 -0.845086 28.9764 5.18301C32.187 0.661909 45.0294 0.661908 47.1698 8.39934C52.5209 5.18301 60.0123 12.7179 55.7315 17.239Z" };
+        }
+        diagram_node.ExpandIcon = new DiagramExpandIcon()
+            {
+                Shape = DiagramExpandIcons.Minus,
+                Height = 15,
+                Width = 15,
+                CornerRadius = 10,
+                OffsetX = (MindmapData.Branch == BranchType.Root) ? 0.5 : (MindmapData.Branch == BranchType.Right || MindmapData.Branch == BranchType.SubRight) ? 0 : 1,
+                OffsetY = (MindmapData.Branch == BranchType.Root) ? 1 : (MindmapData.Branch == BranchType.Right || MindmapData.Branch == BranchType.SubRight) ? 0.5 : 0.5
+            };
+        diagram_node.CollapseIcon = new DiagramCollapseIcon()
+            {
+                Shape = DiagramCollapseIcons.Plus,
+                Height = 15,
+                Width = 15,
+                CornerRadius = 10,
+                OffsetX = (MindmapData.Branch == BranchType.Root) ? 0.5 : (MindmapData.Branch == BranchType.Right || MindmapData.Branch == BranchType.SubRight) ? 0 : 1,
+                OffsetY = (MindmapData.Branch == BranchType.Root) ? 1 : (MindmapData.Branch == BranchType.Right || MindmapData.Branch == BranchType.SubRight) ? 0.5 : 0.5
+            };
+    }
+    private void ConnectorCreate(IDiagramObject connector)
+    {
+        Connector diagram_connector = connector as Connector;
+        diagram_connector.Type = ConnectorSegmentType.Bezier;
+        diagram_connector.SourceDecorator.Shape = DecoratorShape.None;
+        diagram_connector.TargetDecorator.Shape = DecoratorShape.None;
+        Node sourceNode = diagram.GetObject(diagram_connector.SourceID) as Node;
+        MindmapDetails MindmapData = sourceNode.Data as MindmapDetails;
+        if (MindmapData.Branch == BranchType.Root)
+        {
+            diagram_connector.Style = new ShapeStyle() { StrokeColor = "#8E44AD", StrokeWidth = 3 };
+        }
+        else if (MindmapData.Branch == BranchType.Left || MindmapData.Branch == BranchType.Right)
+        {
+            diagram_connector.Style = new ShapeStyle() { StrokeColor = "#3498DB", StrokeWidth = 3 };
+        }
+        else
+            diagram_connector.Style = new ShapeStyle() { StrokeColor = "#3dbfc9", StrokeWidth = 3 };
+
+    }
+
+}
